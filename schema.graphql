@@ -1,6 +1,9 @@
 type Factory @entity {
   # factory address
+  address: Bytes!
+  # 1
   id: ID!
+
   # amount of pools created
   poolCount: BigInt!
   # amoutn of transactions all time
@@ -26,13 +29,8 @@ type Factory @entity {
 
   # current owner of the factory
   owner: ID!
-}
 
-# stores for USD calculations
-type Bundle @entity {
-  id: ID!
-  # price of ETH in usd
-  ethPriceUSD: BigDecimal!
+  nativePrice: BigDecimal!
 }
 
 type Token @entity {
@@ -132,7 +130,7 @@ type Pool @entity {
   # Fields used to help derived relationship
   liquidityProviderCount: BigInt! # used to detect new exchanges
   # hourly snapshots of pool data
-  poolHourData: [PoolHourData!]! @derivedFrom(field: "pool")
+  # poolHourData: [PoolHourData!]! @derivedFrom(field: "pool")
   # daily snapshots of pool data
   poolDayData: [PoolDayData!]! @derivedFrom(field: "pool")
   # derived fields
@@ -276,7 +274,7 @@ type Transaction @entity {
   swaps: [Swap]! @derivedFrom(field: "transaction")
   flashed: [Flash]! @derivedFrom(field: "transaction")
   collects: [Collect]! @derivedFrom(field: "transaction")
-}
+} 
 
 type Mint @entity {
   # transaction hash + "#" + index in mints Transaction array
@@ -313,7 +311,7 @@ type Mint @entity {
   logIndex: BigInt
 }
 
-type Burn @entity {
+type Burn @entity { 
   # transaction hash + "#" + index in mints Transaction array
   id: ID!
   # txn burn was included in
@@ -496,71 +494,71 @@ type PoolDayData @entity {
 }
 
 # hourly stats tracker for pool
-type PoolHourData @entity {
-  # format: <pool address>-<timestamp>
-  id: ID!
-  # unix timestamp for start of hour
-  periodStartUnix: Int!
-  # pointer to pool
-  pool: Pool!
-  # in range liquidity at end of period
-  liquidity: BigInt!
-  # current price tracker at end of period
-  sqrtPrice: BigInt!
-  # price of token0 - derived from sqrtPrice
-  token0Price: BigDecimal!
-  # price of token1 - derived from sqrtPrice
-  token1Price: BigDecimal!
-  # current tick at end of period
-  tick: BigInt
-  # tracker for global fee growth
-  feeGrowthGlobal0X128: BigInt!
-  # tracker for global fee growth
-  feeGrowthGlobal1X128: BigInt!
-  # tvl derived in USD at end of period
-  tvlUSD: BigDecimal!
-  # volume in token0
-  volumeToken0: BigDecimal!
-  # volume in token1
-  volumeToken1: BigDecimal!
-  # volume in USD
-  volumeUSD: BigDecimal!
-  # fees in USD
-  feesUSD: BigDecimal!
-  # numebr of transactions during period
-  txCount: BigInt!
-  # opening price of token0
-  open: BigDecimal!
-  # high price of token0
-  high: BigDecimal!
-  # low price of token0
-  low: BigDecimal!
-  # close price of token0
-  close: BigDecimal!
-}
+# type PoolHourData @entity {
+#   # format: <pool address>-<timestamp>
+#   id: ID!
+#   # unix timestamp for start of hour
+#   periodStartUnix: Int!
+#   # pointer to pool
+#   pool: Pool!
+#   # in range liquidity at end of period
+#   liquidity: BigInt!
+#   # current price tracker at end of period
+#   sqrtPrice: BigInt!
+#   # price of token0 - derived from sqrtPrice
+#   token0Price: BigDecimal!
+#   # price of token1 - derived from sqrtPrice
+#   token1Price: BigDecimal!
+#   # current tick at end of period
+#   tick: BigInt
+#   # tracker for global fee growth
+#   feeGrowthGlobal0X128: BigInt!
+#   # tracker for global fee growth
+#   feeGrowthGlobal1X128: BigInt!
+#   # tvl derived in USD at end of period
+#   tvlUSD: BigDecimal!
+#   # volume in token0
+#   volumeToken0: BigDecimal!
+#   # volume in token1
+#   volumeToken1: BigDecimal!
+#   # volume in USD
+#   volumeUSD: BigDecimal!
+#   # fees in USD
+#   feesUSD: BigDecimal!
+#   # numebr of transactions during period
+#   txCount: BigInt!
+#   # opening price of token0
+#   open: BigDecimal!
+#   # high price of token0
+#   high: BigDecimal!
+#   # low price of token0
+#   low: BigDecimal!
+#   # close price of token0
+#   close: BigDecimal!
+# }
 
-type TickHourData @entity {
-  # format: <pool address>-<tick index>-<timestamp>
-  id: ID!
-  # unix timestamp for start of hour
-  periodStartUnix: Int!
-  # pointer to pool
-  pool: Pool!
-  # pointer to tick
-  tick: Tick!
-  # total liquidity pool has as tick lower or upper at end of period
-  liquidityGross: BigInt!
-  # how much liquidity changes when tick crossed at end of period
-  liquidityNet: BigInt!
-  # hourly volume of token0 with this tick in range
-  volumeToken0: BigDecimal!
-  # hourly volume of token1 with this tick in range
-  volumeToken1: BigDecimal!
-  # hourly volume in derived USD with this tick in range
-  volumeUSD: BigDecimal!
-  # fees in USD
-  feesUSD: BigDecimal!
-}
+# type TickHourData @entity {
+#   # format: <pool address>-<tick index>-<timestamp>
+#   id: ID!
+#   # unix timestamp for start of hour
+#   periodStartUnix: Int!
+#   # pointer to pool
+#   pool: Pool!
+#   # pointer to tick
+#   tick: Tick!
+#   # total liquidity pool has as tick lower or upper at end of period
+#   liquidityGross: BigInt!
+#   # how much liquidity changes when tick crossed at end of period
+#   liquidityNet: BigInt!
+#   # hourly volume of token0 with this tick in range
+#   volumeToken0: BigDecimal!
+#   # hourly volume of token1 with this tick in range
+#   volumeToken1: BigDecimal!
+#   # hourly volume in derived USD with this tick in range
+#   volumeUSD: BigDecimal!
+#   # fees in USD
+#   feesUSD: BigDecimal!
+# }
 
 # Data accumulated and condensed into day stats for each exchange
 # Note: this entity gets saved only if there is a change during the day
@@ -621,33 +619,33 @@ type TokenDayData @entity {
   close: BigDecimal!
 }
 
-type TokenHourData @entity {
-  # token address concatendated with date
-  id: ID!
-  # unix timestamp for start of hour
-  periodStartUnix: Int!
-  # pointer to token
-  token: Token!
-  # volume in token units
-  volume: BigDecimal!
-  # volume in derived USD
-  volumeUSD: BigDecimal!
-  # volume in USD even on pools with less reliable USD values
-  untrackedVolumeUSD: BigDecimal!
-  # liquidity across all pools in token units
-  totalValueLocked: BigDecimal!
-  # liquidity across all pools in derived USD
-  totalValueLockedUSD: BigDecimal!
-  # price at end of period in USD
-  priceUSD: BigDecimal!
-  # fees in USD
-  feesUSD: BigDecimal!
-  # opening price USD
-  open: BigDecimal!
-  # high price USD
-  high: BigDecimal!
-  # low price USD
-  low: BigDecimal!
-  # close price USD
-  close: BigDecimal!
-}
+# type TokenHourData @entity {
+#   # token address concatendated with date
+#   id: ID!
+#   # unix timestamp for start of hour
+#   periodStartUnix: Int!
+#   # pointer to token
+#   token: Token!
+#   # volume in token units
+#   volume: BigDecimal!
+#   # volume in derived USD
+#   volumeUSD: BigDecimal!
+#   # volume in USD even on pools with less reliable USD values
+#   untrackedVolumeUSD: BigDecimal!
+#   # liquidity across all pools in token units
+#   totalValueLocked: BigDecimal!
+#   # liquidity across all pools in derived USD
+#   totalValueLockedUSD: BigDecimal!
+#   # price at end of period in USD
+#   priceUSD: BigDecimal!
+#   # fees in USD
+#   feesUSD: BigDecimal!
+#   # opening price USD
+#   open: BigDecimal!
+#   # high price USD
+#   high: BigDecimal!
+#   # low price USD
+#   low: BigDecimal!
+#   # close price USD
+#   close: BigDecimal!
+# }

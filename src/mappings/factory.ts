@@ -2,8 +2,8 @@ import { WHITELIST_TOKENS } from './../utils/pricing'
 /* eslint-disable prefer-const */
 import { FACTORY_ADDRESS, ZERO_BI, ONE_BI, ZERO_BD, ADDRESS_ZERO } from './../utils/constants'
 import { Factory } from '../types/schema'
-import { PoolCreated } from '../types/Factory/Factory'
-import { Pool, Token, Bundle } from '../types/schema'
+import { PoolCreated } from '../types/UniswapV3Factory/Factory'
+import { Pool, Token } from '../types/schema'
 import { Pool as PoolTemplate } from '../types/templates'
 import { fetchTokenSymbol, fetchTokenName, fetchTokenTotalSupply, fetchTokenDecimals } from '../utils/token'
 import { log, BigInt, Address } from '@graphprotocol/graph-ts'
@@ -15,9 +15,10 @@ export function handlePoolCreated(event: PoolCreated): void {
   }
 
   // load factory
-  let factory = Factory.load(FACTORY_ADDRESS)
+  let factory = Factory.load("1")
   if (factory === null) {
-    factory = new Factory(FACTORY_ADDRESS)
+    factory = new Factory("1")
+    factory.address = Address.fromString(FACTORY_ADDRESS);
     factory.poolCount = ZERO_BI
     factory.totalVolumeETH = ZERO_BD
     factory.totalVolumeUSD = ZERO_BD
@@ -30,11 +31,7 @@ export function handlePoolCreated(event: PoolCreated): void {
     factory.totalValueLockedETHUntracked = ZERO_BD
     factory.txCount = ZERO_BI
     factory.owner = ADDRESS_ZERO
-
-    // create new bundle for tracking eth price
-    let bundle = new Bundle('1')
-    bundle.ethPriceUSD = ZERO_BD
-    bundle.save()
+    factory.nativePrice = ZERO_BD
   }
 
   factory.poolCount = factory.poolCount.plus(ONE_BI)

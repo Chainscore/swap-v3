@@ -7,9 +7,6 @@ import {
   PoolDayData,
   Token,
   TokenDayData,
-  TokenHourData,
-  Bundle,
-  PoolHourData,
   TickDayData,
   Tick
 } from './../types/schema'
@@ -89,59 +86,9 @@ export function updatePoolDayData(event: ethereum.Event): PoolDayData {
   return poolDayData as PoolDayData
 }
 
-export function updatePoolHourData(event: ethereum.Event): PoolHourData {
-  let timestamp = event.block.timestamp.toI32()
-  let hourIndex = timestamp / 3600 // get unique hour within unix history
-  let hourStartUnix = hourIndex * 3600 // want the rounded effect
-  let hourPoolID = event.address
-    .toHexString()
-    .concat('-')
-    .concat(hourIndex.toString())
-  let pool = Pool.load(event.address.toHexString())
-  let poolHourData = PoolHourData.load(hourPoolID)
-  if (poolHourData === null) {
-    poolHourData = new PoolHourData(hourPoolID)
-    poolHourData.periodStartUnix = hourStartUnix
-    poolHourData.pool = pool.id
-    // things that dont get initialized always
-    poolHourData.volumeToken0 = ZERO_BD
-    poolHourData.volumeToken1 = ZERO_BD
-    poolHourData.volumeUSD = ZERO_BD
-    poolHourData.txCount = ZERO_BI
-    poolHourData.feesUSD = ZERO_BD
-    poolHourData.feeGrowthGlobal0X128 = ZERO_BI
-    poolHourData.feeGrowthGlobal1X128 = ZERO_BI
-    poolHourData.open = pool.token0Price
-    poolHourData.high = pool.token0Price
-    poolHourData.low = pool.token0Price
-    poolHourData.close = pool.token0Price
-  }
-
-  if (pool.token0Price.gt(poolHourData.high)) {
-    poolHourData.high = pool.token0Price
-  }
-  if (pool.token0Price.lt(poolHourData.low)) {
-    poolHourData.low = pool.token0Price
-  }
-
-  poolHourData.liquidity = pool.liquidity
-  poolHourData.sqrtPrice = pool.sqrtPrice
-  poolHourData.token0Price = pool.token0Price
-  poolHourData.token1Price = pool.token1Price
-  poolHourData.feeGrowthGlobal0X128 = pool.feeGrowthGlobal0X128
-  poolHourData.feeGrowthGlobal1X128 = pool.feeGrowthGlobal1X128
-  poolHourData.close = pool.token0Price
-  poolHourData.tick = pool.tick
-  poolHourData.tvlUSD = pool.totalValueLockedUSD
-  poolHourData.txCount = poolHourData.txCount.plus(ONE_BI)
-  poolHourData.save()
-
-  // test
-  return poolHourData as PoolHourData
-}
 
 export function updateTokenDayData(token: Token, event: ethereum.Event): TokenDayData {
-  let bundle = Bundle.load('1')
+  let factory = Factory.load('1')
   let timestamp = event.block.timestamp.toI32()
   let dayID = timestamp / 86400
   let dayStartTimestamp = dayID * 86400
@@ -149,7 +96,7 @@ export function updateTokenDayData(token: Token, event: ethereum.Event): TokenDa
     .toString()
     .concat('-')
     .concat(dayID.toString())
-  let tokenPrice = token.derivedETH.times(bundle.ethPriceUSD)
+  let tokenPrice = token.derivedETH.times(factory.nativePrice)
 
   let tokenDayData = TokenDayData.load(tokenDayID)
   if (tokenDayData === null) {
@@ -175,7 +122,7 @@ export function updateTokenDayData(token: Token, event: ethereum.Event): TokenDa
   }
 
   tokenDayData.close = tokenPrice
-  tokenDayData.priceUSD = token.derivedETH.times(bundle.ethPriceUSD)
+  tokenDayData.priceUSD = token.derivedETH.times(factory.nativePrice)
   tokenDayData.totalValueLocked = token.totalValueLocked
   tokenDayData.totalValueLockedUSD = token.totalValueLockedUSD
   tokenDayData.save()
@@ -183,48 +130,6 @@ export function updateTokenDayData(token: Token, event: ethereum.Event): TokenDa
   return tokenDayData as TokenDayData
 }
 
-export function updateTokenHourData(token: Token, event: ethereum.Event): TokenHourData {
-  let bundle = Bundle.load('1')
-  let timestamp = event.block.timestamp.toI32()
-  let hourIndex = timestamp / 3600 // get unique hour within unix history
-  let hourStartUnix = hourIndex * 3600 // want the rounded effect
-  let tokenHourID = token.id
-    .toString()
-    .concat('-')
-    .concat(hourIndex.toString())
-  let tokenHourData = TokenHourData.load(tokenHourID)
-  let tokenPrice = token.derivedETH.times(bundle.ethPriceUSD)
-
-  if (tokenHourData === null) {
-    tokenHourData = new TokenHourData(tokenHourID)
-    tokenHourData.periodStartUnix = hourStartUnix
-    tokenHourData.token = token.id
-    tokenHourData.volume = ZERO_BD
-    tokenHourData.volumeUSD = ZERO_BD
-    tokenHourData.untrackedVolumeUSD = ZERO_BD
-    tokenHourData.feesUSD = ZERO_BD
-    tokenHourData.open = tokenPrice
-    tokenHourData.high = tokenPrice
-    tokenHourData.low = tokenPrice
-    tokenHourData.close = tokenPrice
-  }
-
-  if (tokenPrice.gt(tokenHourData.high)) {
-    tokenHourData.high = tokenPrice
-  }
-
-  if (tokenPrice.lt(tokenHourData.low)) {
-    tokenHourData.low = tokenPrice
-  }
-
-  tokenHourData.close = tokenPrice
-  tokenHourData.priceUSD = tokenPrice
-  tokenHourData.totalValueLocked = token.totalValueLocked
-  tokenHourData.totalValueLockedUSD = token.totalValueLockedUSD
-  tokenHourData.save()
-
-  return tokenHourData as TokenHourData
-}
 
 export function updateTickDayData(tick: Tick, event: ethereum.Event): TickDayData {
   let timestamp = event.block.timestamp.toI32()
